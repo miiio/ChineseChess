@@ -5,12 +5,15 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
+import com.a510.chinesechess.Bean.ChessBean;
 import com.a510.chinesechess.R;
 
 /**
@@ -18,16 +21,22 @@ import com.a510.chinesechess.R;
  */
 
 public class ChessBoardView extends View{
-    private int mViewHeight;
+    private int mViewHeight; //控件大小
     private int mViewWidth;
-    private float mChessBoardHeight;
+    private float mChessBoardHeight; //棋盘大小
     private float mChessBoardWidth;
-    private float mChessSize;
-    private float mChessBoardOffset; //棋盘边距的偏移
+    private float mChessSize; //棋子大小
+    private float mChessBoardLeftOffset; //棋盘边距
+    private float mChessBoardTopOffset;
+    private float mChessboardTop; //棋盘位置
+    private float mChessboardLeft;
+    private float mChessBoxSize; //棋盘上格子的大小
+
+    private Point chess = new Point(-1,-1);
 
     private Resources mResources;
     private Bitmap mChessBitmap;
-    private Bitmap mChessBoardBitmap; //0.065
+    private Bitmap mChessBoardBitmap;
 
     public ChessBoardView(Context context) {
         super(context);
@@ -57,8 +66,13 @@ public class ChessBoardView extends View{
             mChessBoardWidth = mViewWidth-20;
             mChessBoardHeight = (int) (mChessBoardWidth * 1.16f);
 
+            mChessBoardLeftOffset = mChessBoardWidth * 0.058f;
+            mChessBoardTopOffset = mChessBoardHeight * 0.053f;
+
             //计算棋子的大小
-            mChessSize = mChessBoardWidth / 9 - 10;
+            mChessBoxSize = (mChessBoardWidth - 2 * mChessBoardLeftOffset) / 8;
+            mChessSize = mChessBoxSize- 10;
+
 
 
             //测量完成之后初始化资源
@@ -75,14 +89,14 @@ public class ChessBoardView extends View{
         Bitmap bitmap;
 
         //棋盘资源的初始化
-        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.chessboard)).getBitmap();
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.chessboard ,null)).getBitmap();
         matrix = new Matrix();
         matrix.postScale(mChessBoardWidth/bitmap.getWidth(),mChessBoardHeight/bitmap.getHeight()); //缩放尺寸
         mChessBoardBitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true);
         bitmap = null;
 
         //棋子底图资源的初始化
-        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.chess_bg)).getBitmap();
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.chess_bg ,null)).getBitmap();
         matrix = new Matrix();
         matrix.postScale(mChessSize/bitmap.getWidth(),mChessSize/bitmap.getHeight()); //缩放尺寸
         mChessBitmap = Bitmap.createBitmap (bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,true);
@@ -95,13 +109,59 @@ public class ChessBoardView extends View{
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawChessBoard(canvas);
+
+        if(chess.x!=-1&&chess.y!=-1){
+            Point p = CBCoordToViewCoord(chess);
+            canvas.drawBitmap(mChessBitmap,p.x-mChessBoxSize/2,p.y-mChessBoxSize/2,null);
+        }
+    }
+
+    private void drawChess(Canvas canvas, ChessBean chess){
+
     }
 
     private void drawChessBoard(Canvas canvas) {
-        float chessboardTop = (mViewHeight - mChessBoardHeight) / 2.5f;
-        float chessboardLeft = 10;
-        canvas.drawBitmap(mChessBoardBitmap,chessboardLeft,chessboardTop,null);
+        mChessboardTop = (mViewHeight - mChessBoardHeight) / 2.5f;
+        mChessboardLeft = 10;
+        canvas.drawBitmap(mChessBoardBitmap,mChessboardLeft,mChessboardTop,null);
     }
 
+    /**
+     * 将棋子的在棋盘中的坐标转换成真实坐标
+     * @param point 棋子的坐标
+     * @return
+     */
+    private Point CBCoordToViewCoord(Point point){
+        return new Point((int)mChessboardLeft+(int)mChessBoardLeftOffset+point.x*(int)mChessBoxSize
+                ,(int)mChessboardTop+(int) mChessBoardTopOffset +point.y*(int)mChessBoxSize);
+    }
 
+    /**
+     * 将真实坐标转换成棋子的在棋盘中的坐标
+     * @param point 屏幕上的坐标
+     * @return
+     */
+    private Point ViewCoordToCBCoord(Point point){
+        for(int i = 0; i<9; i++) {
+            for (int j = 0; j < 10; j++) {
+                Point p = CBCoordToViewCoord(new Point(i, j));
+                if ((point.x - p.x) * (point.x - p.x) + (point.y - p.y) * (point.y - p.y) <=
+                        (mChessBoxSize / 2) * (mChessBoxSize / 2f)) {
+                    return new Point(i, j);
+                }
+            }
+        }
+        return new Point(-1,-1);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction() ==  MotionEvent.ACTION_DOWN){
+            Point point = new Point((int)event.getX(),(int)event.getY());
+            chess = ViewCoordToCBCoord(point);
+            Log.v("chess",chess.x+","+chess.y);
+            invalidate();
+        }
+        return super.onTouchEvent(event);
+    }
 }
