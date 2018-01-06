@@ -30,7 +30,7 @@ public class ChessBoardView extends View{
     private float mChessBoardTopOffset;
     private float mChessboardTop; //棋盘位置
     private float mChessboardLeft;
-    private float mChessBoxSize; //棋盘上格子的大小
+    private float mChessRectSize; //棋盘上格子的大小
 
     private Point chess = new Point(-1,-1);
 
@@ -70,8 +70,8 @@ public class ChessBoardView extends View{
             mChessBoardTopOffset = mChessBoardHeight * 0.053f;
 
             //计算棋子的大小
-            mChessBoxSize = (mChessBoardWidth - 2 * mChessBoardLeftOffset) / 8;
-            mChessSize = mChessBoxSize- 10;
+            mChessRectSize = (mChessBoardWidth - 2 * mChessBoardLeftOffset) / 8;
+            mChessSize = mChessRectSize - 10;
 
 
 
@@ -112,7 +112,7 @@ public class ChessBoardView extends View{
 
         if(chess.x!=-1&&chess.y!=-1){
             Point p = CBCoordToViewCoord(chess);
-            canvas.drawBitmap(mChessBitmap,p.x-mChessBoxSize/2,p.y-mChessBoxSize/2,null);
+            canvas.drawBitmap(mChessBitmap,p.x- mChessRectSize /2,p.y- mChessRectSize /2,null);
         }
     }
 
@@ -132,8 +132,8 @@ public class ChessBoardView extends View{
      * @return
      */
     private Point CBCoordToViewCoord(Point point){
-        return new Point((int)mChessboardLeft+(int)mChessBoardLeftOffset+point.x*(int)mChessBoxSize
-                ,(int)mChessboardTop+(int) mChessBoardTopOffset +point.y*(int)mChessBoxSize);
+        return new Point((int)mChessboardLeft+(int)mChessBoardLeftOffset+point.x*(int) mChessRectSize
+                ,(int)mChessboardTop+(int) mChessBoardTopOffset +point.y*(int) mChessRectSize);
     }
 
     /**
@@ -146,7 +146,7 @@ public class ChessBoardView extends View{
             for (int j = 0; j < 10; j++) {
                 Point p = CBCoordToViewCoord(new Point(i, j));
                 if ((point.x - p.x) * (point.x - p.x) + (point.y - p.y) * (point.y - p.y) <=
-                        (mChessBoxSize / 2) * (mChessBoxSize / 2f)) {
+                        (mChessRectSize / 2f) * (mChessRectSize / 2f)) {
                     return new Point(i, j);
                 }
             }
