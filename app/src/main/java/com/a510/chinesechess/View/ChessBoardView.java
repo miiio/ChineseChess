@@ -8,7 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -53,6 +55,13 @@ public class ChessBoardView extends View {
     private Bitmap mPreMoveMarkBitmap[];
     private Bitmap mWinTextBitmap[];
     private Bitmap mSettlementBgBitmap;
+    private Bitmap mCloseBtnBitmap;
+    private Bitmap mCollectionBitmap;
+    private Bitmap mAgainBtnBitmap;
+
+    private Rect mCloseBtnRect;
+    private Rect mCollectionBtnRect;
+    private Rect mAgainBtnRect;
 
     //动画相关
     private ValueAnimator mCheckAnimator;
@@ -78,6 +87,7 @@ public class ChessBoardView extends View {
 
     private float mChessBoardCacheTop;
     private float mGreenClothsTop;
+    private float mAgainBtnTop;
     private float mGameOverTop;
     private float mGameOverAnimScaleValue; //结束动画的缩放倍数
 
@@ -97,6 +107,9 @@ public class ChessBoardView extends View {
     private int mCurColor; //当前轮到什么颜色下
 
     private Point mPreMovePoint[]; //记录上一次移动
+
+    private int mChessCounter; //计步
+    private long mTimeCounter; //计时
 
     //画笔
 
@@ -208,6 +221,19 @@ public class ChessBoardView extends View {
         mSettlementBgBitmap = Bitmap.createBitmap(bitmap, 0, 0,
                 bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.btn_close, null)).getBitmap();
+        mCloseBtnBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.collection, null)).getBitmap();
+        mCollectionBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        //按钮
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.btn_again, null)).getBitmap();
+        matrix.setScale((mViewWidth*0.34f)/bitmap.getWidth(),(mViewHeight*0.07f)/bitmap.getHeight());
+        mAgainBtnBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                bitmap.getWidth(), bitmap.getHeight(), matrix, true);
 
         //点击标志资源的初始化
         bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.chess_click_mark, null)).getBitmap();
@@ -272,6 +298,8 @@ public class ChessBoardView extends View {
         mPreMovePoint = new Point[2];
         mPreMovePoint[0] = new Point(-1,-1);
         mPreMovePoint[1] = new Point(-1,-1);
+        mTimeCounter = System.currentTimeMillis();
+        mChessCounter = 0;
         mChessData = new ChessBean[9][10];
 
         //红方
@@ -498,6 +526,64 @@ public class ChessBoardView extends View {
             canvas.drawBitmap(mSettlementBgBitmap,mViewWidth/2-mSettlementBgBitmap.getWidth()/2,
                     settlementTop,null);
 
+            //结算文字
+            Paint paint = new Paint();
+            paint.setColor(Color.rgb(179,168,164));
+            //paint.setColor(Color.rgb(227,196,68)); 黄色
+            paint.setAntiAlias(true);
+            paint.setTextSize(55);
+            paint.setStyle(Paint.Style.STROKE);
+            String s1 = "全局用时：";
+            String s2 = "共走子：";
+            int sec = (int)(mTimeCounter/1000);
+            String s11 = sec/60+"分钟"+sec%60+"秒";
+            if(sec<60){
+                s11 = sec+"秒";
+            }
+            String s22 = mChessCounter+"步";
+            float len1 = paint.measureText(s1+s11);
+            float len2 = paint.measureText(s2+s22);
+            float text1Y = settlementTop+mSettlementBgBitmap.getHeight()/2-10;
+            float text2Y = settlementTop+mSettlementBgBitmap.getHeight()/2 +(paint.descent()-paint.ascent());
+
+            canvas.drawText(s1,mViewWidth/2-len1/2,text1Y,paint);
+            canvas.drawText(s2,mViewWidth/2-len1/2+paint.measureText("全"), text2Y,paint);
+
+            paint.setColor(Color.rgb(227,196,68)); //黄色
+            canvas.drawText(s11,mViewWidth/2-len1/2+paint.measureText(s1),text1Y,paint);
+            canvas.drawText(s22,mViewWidth/2-len1/2+paint.measureText("全")+paint.measureText(s2),
+                    text2Y,paint);
+
+            //绘制按钮
+            canvas.drawBitmap(mCloseBtnBitmap,mViewWidth-mCloseBtnBitmap.getWidth()*1.2f,
+                    mCloseBtnBitmap.getHeight()*0.2f,null);
+            canvas.drawBitmap(mCollectionBitmap,mCloseBtnBitmap.getWidth()*0.2f
+                    ,0,null);
+            mAgainBtnTop = (mViewHeight-settlementTop-mSettlementBgBitmap.getHeight()
+                    -mAgainBtnBitmap.getHeight())/2
+                    +settlementTop+mSettlementBgBitmap.getHeight();
+            canvas.drawBitmap(mAgainBtnBitmap,mViewWidth/2-mAgainBtnBitmap.getWidth()/2,
+                    mAgainBtnTop,null);
+
+            //计算按钮判断区域
+            if(mCloseBtnRect==null) {
+                mCloseBtnRect = new Rect();
+            }
+            if(mCollectionBtnRect==null){
+                mCollectionBtnRect = new Rect();
+            }
+            if(mAgainBtnRect==null){
+                mAgainBtnRect = new Rect();
+            }
+            int left = (int)(mViewWidth-mCloseBtnBitmap.getWidth()*1.2f);
+            int top = (int)(mCloseBtnBitmap.getHeight()*0.2f);
+            mCloseBtnRect.set(left, top, left+mCloseBtnBitmap.getWidth(),top+mCloseBtnBitmap.getHeight());
+            left = (int)(mCloseBtnBitmap.getWidth()*0.2f);
+            mCollectionBtnRect.set(left,0,left+mCollectionBitmap.getWidth(), mCollectionBitmap.getHeight());
+            left = mViewWidth/2-mAgainBtnBitmap.getWidth()/2;
+            top  = (int)mAgainBtnTop;
+            mAgainBtnRect.set(left,top,mAgainBtnBitmap.getWidth()+left,mAgainBtnBitmap.getHeight()+top);
+
         }else{
             //绘制棋盘
             drawChessBoard(canvas);
@@ -696,8 +782,24 @@ public class ChessBoardView extends View {
         Point point = new Point((int)event.getX(),(int)event.getY());
         Point chessPoint = ViewCoordToCBCoord(point);
         if(mGameOver){
-            initChess();
+            switch (event.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if(mCloseBtnRect.contains(point.x,point.y)){
+                        //结束
+                    }else if(mCollectionBtnRect.contains(point.x,point.y)){
+                        //收藏
+                    }else if(mAgainBtnRect.contains(point.x,point.y)){
+                        //再来一局
+                        initChess();
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    break;
+            }
             invalidate();
+
         }else{
             switch (event.getAction()){
                 case MotionEvent.ACTION_DOWN:
@@ -792,6 +894,8 @@ public class ChessBoardView extends View {
         setBackgroundColor(Color.rgb(43,35,32));
         mGameOver = true;
         mGreenClothsAnimator.start();
+        mTimeCounter = System.currentTimeMillis()-mTimeCounter;
+
         invalidate();
     }
 
@@ -806,6 +910,7 @@ public class ChessBoardView extends View {
                 || !getChessHint(chess).contains(point) ) {
             return;
         }
+        mChessCounter++;
         boolean isEatChess = getChess(point)!=null;
         if(isEatChess && getChess(point)!= null && getChess(point).getType()==ChessType.KING){
             mWinner = chess.getColor();
