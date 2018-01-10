@@ -8,7 +8,7 @@ import android.graphics.Point;
 
 public class ChessBean {
     public ChessBean(Point coord, int type, int color) {
-        Coord = coord;
+        Coord = new Point(coord.x,coord.y);
         Type = type;
         Color = color;
     }
@@ -22,7 +22,7 @@ public class ChessBean {
     }
 
     public void setCoord(Point coord) {
-        Coord = coord;
+        Coord.set(coord.x,coord.y);
     }
 
     public int getType() {

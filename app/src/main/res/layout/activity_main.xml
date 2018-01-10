@@ -7,7 +7,6 @@
     android:layout_height="match_parent">
 
     <com.a510.chinesechess.View.ChessBoardView
-        android:background="@drawable/chessboard_bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
