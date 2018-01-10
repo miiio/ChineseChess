@@ -13,6 +13,23 @@ public class ChessBean {
         Color = color;
     }
 
+    /**
+     * 通过一个12位二进制构造一个棋子(0000 0000 0000 后8位分别是coord.x,coord.y 9~11存type, 12存color)
+     * @param i
+     */
+    public ChessBean(int i) {
+        setValue(i);
+    }
+
+    public void setValue(int i){
+        this.Color = i>>11&1; //第12位为
+        this.Type = i>>8&7;
+        if(this.Coord == null){
+            this.Coord = new Point();
+        }
+        this.Coord .set(i&15,i>>4&15);
+    }
+
     private Point Coord;
     private int Type;
     private int Color;
@@ -39,5 +56,17 @@ public class ChessBean {
 
     public void setColor(int color) {
         Color = color;
+    }
+
+    /**
+     * 将棋子用12位二进制储存(0000 0000 0000 1~8位分别是coord.x,coord.y 9~11存type, 12存color)
+     * @return
+     */
+    public int toInt() {
+        int result = Coord.x;
+        result |= Coord.y<<4; //将y左移4位后存入result
+        result |= Type<<8;
+        result |= Color<<11;
+        return result;
     }
 }

@@ -14,6 +14,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,8 @@ import com.a510.chinesechess.Util.ChessType;
 import com.a510.chinesechess.Util.PointEvaluator;
 
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Stack;
 
 /**
  * Created by Lao on 2018/1/6.
@@ -111,7 +114,7 @@ public class ChessBoardView extends View {
     private int mChessCounter; //计步
     private long mTimeCounter; //计时
 
-    //画笔
+    private Stack<String> mChessDataStack;
 
 
     public ChessBoardView(Context context) {
@@ -285,6 +288,7 @@ public class ChessBoardView extends View {
 
     private void initChess(){
         setBackgroundResource(R.drawable.chessboard_bg);
+        mChessDataStack = new Stack<>();
         mCurColor = ChessType.BLACK;
         mWinner = -1;
         mGreenClothsTop = -1;
@@ -980,9 +984,10 @@ public class ChessBoardView extends View {
             mMovingChessPoint.set(point.x,point.y);
             mEatChessAnimator.start();
         }
-
-
         mCurColor = mCurColor==ChessType.BLACK?ChessType.RED:ChessType.BLACK;
+
+        mChessDataStack.push(getStrData());
+        Log.v("chessData",getStrData());
     }
 
     /**
@@ -1241,7 +1246,6 @@ public class ChessBoardView extends View {
         return points;
     }
 
-
     /**
      * 获取指定坐标的棋子
      *
@@ -1408,4 +1412,59 @@ public class ChessBoardView extends View {
         return resId;
     }
 
+    /**
+     * 将当前棋盘格式化成一段字符串
+     *
+     * @return
+     */
+    public String getStrData(){
+//        //棋盘数据
+//        private ChessBean mChessData[][];
+//        private int mWinner;
+//        private boolean mGameOver;
+//        private int mCurColor; //当前轮到什么颜色下
+//        private Point mPreMovePoint[]; //记录上一次移动
+//        private int mChessCounter; //计步
+        String result = "";
+        ArrayList<ChessBean> chessList = getAllChess(-1);
+        for(ChessBean chess : chessList){
+            result += chess.toInt()+",";
+        }
+        result += (mGameOver?"1":"0")+",";
+        result += mWinner+",";
+        result += mCurColor+",";
+        result += mPreMovePoint[0].x+","+mPreMovePoint[0].y+",";
+        result += mPreMovePoint[1].x+","+mPreMovePoint[1].y+",";
+        result += mChessCounter;
+        return result;
+    }
+
+    /**
+     * 将当前棋盘数据设置为字符串中储存的数据
+     * @param str
+     */
+    public void setStrData(String str){
+        //分割
+        String[] s = str.split(",");
+
+        //设置棋子数据
+        mChessData = new ChessBean[9][10]; //先清空
+        int chessNum = s.length - 8;
+        for(int i = 0; i<s.length-8; i++){
+            ChessBean chess = new ChessBean(Integer.valueOf(s[i]));
+            mChessData[chess.getCoord().x][chess.getCoord().y] = chess;
+        }
+
+        //其他数据
+        mGameOver = Integer.valueOf(s[chessNum])==1;
+        mWinner = Integer.valueOf(s[chessNum+1]);
+        mCurColor = Integer.valueOf(s[chessNum+2]);
+
+        mPreMovePoint[0].x = Integer.valueOf(s[chessNum+3]);
+        mPreMovePoint[0].y = Integer.valueOf(s[chessNum+4]);
+        mPreMovePoint[1].x = Integer.valueOf(s[chessNum+5]);
+        mPreMovePoint[1].y = Integer.valueOf(s[chessNum+6]);
+
+        mChessCounter = Integer.valueOf(s[chessNum+7]);
+    }
 }
