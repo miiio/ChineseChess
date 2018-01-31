@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Chinese Chess</string>
+    <string name="time_consuming">全局用时：</string>
+    <string name="step_number">共走子：</string>
 </resources>
