@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.a510.chinesechess.View.ChessBoardView
+    <com.a510.chinesechess.View.PVEChessBoardView
+        android:id="@+id/chessboard"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

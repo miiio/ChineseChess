@@ -2,6 +2,7 @@ package com.a510.chinesechess.View;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -17,7 +18,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 
 import com.a510.chinesechess.Bean.ChessBean;
@@ -26,95 +26,102 @@ import com.a510.chinesechess.Util.ChessType;
 import com.a510.chinesechess.Util.PointEvaluator;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.Stack;
 
 /**
  * Created by Lao on 2018/1/6.
  */
 
-public class ChessBoardView extends View {
-    private Context mContext;
+public abstract class ChessBoardView extends View {
+    protected Context mContext;
 
-    private int mViewHeight; //控件大小
-    private int mViewWidth;
-    private float mChessBoardHeight; //棋盘大小
-    private float mChessBoardWidth;
-    private float mChessSize; //棋子大小
-    private float mChessBoardLeftOffset; //棋盘边距
-    private float mChessBoardTopOffset;
-    private float mChessboardTop; //棋盘位置
-    private float mChessboardLeft;
-    private float mChessRectSize; //棋盘上格子的大小
+    protected int mViewHeight; //控件大小
+    protected int mViewWidth;
+    protected float mChessBoardHeight; //棋盘大小
+    protected float mChessBoardWidth;
+    protected float mChessSize; //棋子大小
+    protected float mChessBoardLeftOffset; //棋盘边距
+    protected float mChessBoardTopOffset;
+    protected float mChessboardTop; //棋盘位置
+    protected float mChessboardLeft;
+    protected float mChessRectSize; //棋盘上格子的大小
 
+    protected Resources mResources;
+    protected Bitmap mChessBitmap;
+    protected Bitmap mChessCheckedBitmap[];
+    protected Bitmap mChessBoardBitmap;
+    protected Bitmap mChessTextBitmap[][][]; //是否被选中、阵营、棋子的类型
+    protected Bitmap mChessClickMark;
+    protected Bitmap mChessHintBitmap;
+    protected Bitmap mPreMoveMarkBitmap[];
+    protected Bitmap mWinTextBitmap[];
+    protected Bitmap mSettlementBgBitmap;
+    protected Bitmap mCloseBtnBitmap;
+    protected Bitmap mCollectionBitmap;
+    protected Bitmap mAgainBtnBitmap;
+    protected Bitmap[] mRestartBtnBitmap;
+    protected Bitmap[] mUndoBtnBitmap;
 
-    private Resources mResources;
-    private Bitmap mChessBitmap;
-    private Bitmap mChessCheckedBitmap[];
-    private Bitmap mChessBoardBitmap;
-    private Bitmap mChessTextBitmap[][][]; //是否被选中、阵营、棋子的类型
-    private Bitmap mChessClickMark;
-    private Bitmap mChessHintBitmap;
-    private Bitmap mPreMoveMarkBitmap[];
-    private Bitmap mWinTextBitmap[];
-    private Bitmap mSettlementBgBitmap;
-    private Bitmap mCloseBtnBitmap;
-    private Bitmap mCollectionBitmap;
-    private Bitmap mAgainBtnBitmap;
+    protected Rect mCloseBtnRect;
+    protected Rect mCollectionBtnRect;
+    protected Rect mAgainBtnRect;
+    protected Rect mRestartBtnRect;
+    protected Rect mUndoBtnRect;
 
-    private Rect mCloseBtnRect;
-    private Rect mCollectionBtnRect;
-    private Rect mAgainBtnRect;
+    protected int mUndoBtnStatus = 0;
+    protected int mRestartBtnStatus = 0;
 
     //动画相关
-    private ValueAnimator mCheckAnimator;
-    private ValueAnimator mKillAnimator;
-    private ValueAnimator mEatChessAnimator;
-    private ValueAnimator mMoveChessAnimator;
-    private ValueAnimator mGreenClothsAnimator;
-    private ValueAnimator mGameOverAnimator;
+    protected ValueAnimator mCheckAnimator;
+    protected ValueAnimator mKillAnimator;
+    protected ValueAnimator mEatChessAnimator;
+    protected ValueAnimator mMoveChessAnimator;
+    protected ValueAnimator mGreenClothsAnimator;
+    protected ValueAnimator mGameOverAnimator;
 
-    private Bitmap mCheckAnimBitmap[]; //将军动画
-    private Bitmap mCenterAnim = null; //一个居中于屏幕的动画
+    protected Bitmap mCheckAnimBitmap[]; //将军动画
+    protected Bitmap mCenterAnim = null; //一个居中于屏幕的动画
 
-    private Bitmap mKillAnimBitmap[]; //绝杀动画
+    protected Bitmap mKillAnimBitmap[]; //绝杀动画
 
-    private Bitmap mEatChessBitmap[]; //吃子动画
-    private Bitmap mEatChessAnim = null; //用于显示吃子动画
+    protected Bitmap mEatChessBitmap[]; //吃子动画
+    protected Bitmap mEatChessAnim = null; //用于显示吃子动画
 
-    private Bitmap mGreenClothsBitmap;
-    private Bitmap mGameOverBitmap;
+    protected Bitmap mGreenClothsBitmap;
+    protected Bitmap mGameOverBitmap;
 
-    private Point mMovingChessPoint;
-    private Point mMovingAnimPoint;
+    protected Point mMovingChessPoint;
+    protected Point mMovingAnimPoint;
 
-    private float mChessBoardCacheTop;
-    private float mGreenClothsTop;
-    private float mAgainBtnTop;
-    private float mGameOverTop;
-    private float mGameOverAnimScaleValue; //结束动画的缩放倍数
+    protected float mChessBoardCacheTop;
+    protected float mGreenClothsTop;
+    protected float mAgainBtnTop;
+    protected float mGameOverTop;
+    protected float mGameOverAnimScaleValue; //结束动画的缩放倍数
 
     //棋盘数据
-    private ChessBean mChessData[][];
-    //private ArrayList<ChessBean> mChessList;
+    protected ChessBean mChessData[][];
+    //protected ArrayList<ChessBean> mChessList;
 
-    private boolean mTouched; //手指是否触摸屏幕
-    private Point mTouchPoint; //手指触摸屏幕的坐标
-    private Point mCheckChess; //被选中的棋子
-    private Point mMovingPoint; //当前移动的坐标
-    private boolean mMoving;
-    private int mWinner;
-    private boolean mGameOver;
-    private Bitmap mChessBoardCacheBitmap;
+    protected int mBottomColor; //位于下方棋子的颜色
+    protected int mTopColor; //位于上方
+    protected boolean mTouched; //手指是否触摸屏幕
+    protected Point mTouchPoint; //手指触摸屏幕的坐标
+    protected Point mCheckChess; //被选中的棋子
+    protected Point mMovingPoint; //当前移动的坐标
+    protected boolean mMoving;
+    protected int mWinner;
+    protected boolean mGameOver;
+    protected Bitmap mChessBoardCacheBitmap;
 
-    private int mCurColor; //当前轮到什么颜色下
+    protected int mCurColor; //当前轮到什么颜色下
 
-    private Point mPreMovePoint[]; //记录上一次移动
+    protected Point mPreMovePoint[]; //记录上一次移动
 
-    private int mChessCounter; //计步
-    private long mTimeCounter; //计时
+    protected int mChessCounter; //计步
+    protected long mTimeCounter; //计时
 
-    private Stack<String> mChessDataStack;
+    protected Stack<String> mChessDataStack;
 
 
     public ChessBoardView(Context context) {
@@ -143,8 +150,14 @@ public class ChessBoardView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        mViewHeight = this.getHeight();
-        mViewWidth = this.getWidth();
+
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mViewHeight = h;
+        mViewWidth = w;
         if (mViewHeight != 0 && mViewWidth != 0) {
             //计算棋盘的大小（高度是宽度的1.16倍）
             mChessBoardWidth = mViewWidth - 20;
@@ -166,7 +179,7 @@ public class ChessBoardView extends View {
     /**
      * 初始化资源文件
      */
-    private void initRes() {
+    protected void initRes() {
         mResources = getResources();
         Matrix matrix;
         Bitmap bitmap;
@@ -274,6 +287,21 @@ public class ChessBoardView extends View {
                 }
             }
         }
+
+
+        mRestartBtnBitmap = new Bitmap[2];
+        mUndoBtnBitmap = new Bitmap[2];
+
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.restart_normal, null)).getBitmap();
+        mRestartBtnBitmap[0] = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.restart_press, null)).getBitmap();
+        mRestartBtnBitmap[1] = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.undo_normal, null)).getBitmap();
+        mUndoBtnBitmap[0] = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.undo_press, null)).getBitmap();
+        mUndoBtnBitmap[1] = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
         mPreMoveMarkBitmap = new Bitmap[2];
         bitmap = ((BitmapDrawable) mResources.getDrawable(R.drawable.prechess0,null)).getBitmap();
         mPreMoveMarkBitmap[0]= Bitmap.createBitmap(bitmap, 0, 0,
@@ -286,10 +314,13 @@ public class ChessBoardView extends View {
         initAnimator();
     }
 
-    private void initChess(){
+    protected void initChess(){
         setBackgroundResource(R.drawable.chessboard_bg);
+        mBottomColor = ChessType.RED; //默认红色
+        mTopColor = ChessType.BLACK;
+
         mChessDataStack = new Stack<>();
-        mCurColor = ChessType.BLACK;
+        mCurColor = ChessType.RED;
         mWinner = -1;
         mGreenClothsTop = -1;
         mGameOverTop = -1;
@@ -306,45 +337,47 @@ public class ChessBoardView extends View {
         mChessCounter = 0;
         mChessData = new ChessBean[9][10];
 
-        //红方
-        mChessData[0][0] = new ChessBean(new Point(0,0),ChessType.ROOKS,ChessType.RED);
-        mChessData[8][0] = new ChessBean(new Point(8,0),ChessType.ROOKS,ChessType.RED);
-        mChessData[1][0] = new ChessBean(new Point(1,0),ChessType.KNIGHTS,ChessType.RED);
-        mChessData[7][0] = new ChessBean(new Point(7,0),ChessType.KNIGHTS,ChessType.RED);
-        mChessData[2][0] = new ChessBean(new Point(2,0),ChessType.ELEPHANTS,ChessType.RED);
-        mChessData[6][0] = new ChessBean(new Point(6,0),ChessType.ELEPHANTS,ChessType.RED);
-        mChessData[3][0] = new ChessBean(new Point(3,0),ChessType.MANDARINS,ChessType.RED);
-        mChessData[5][0] = new ChessBean(new Point(5,0),ChessType.MANDARINS,ChessType.RED);
-        mChessData[4][0] = new ChessBean(new Point(4,0),ChessType.KING,ChessType.RED);
-        mChessData[1][2] = new ChessBean(new Point(1,2),ChessType.CANNONS,ChessType.RED);
-        mChessData[7][2] = new ChessBean(new Point(7,2),ChessType.CANNONS,ChessType.RED);
-        mChessData[0][3] = new ChessBean(new Point(0,3),ChessType.PAWNS,ChessType.RED);
-        mChessData[2][3] = new ChessBean(new Point(2,3),ChessType.PAWNS,ChessType.RED);
-        mChessData[4][3] = new ChessBean(new Point(4,3),ChessType.PAWNS,ChessType.RED);
-        mChessData[6][3] = new ChessBean(new Point(6,3),ChessType.PAWNS,ChessType.RED);
-        mChessData[8][3] = new ChessBean(new Point(8,3),ChessType.PAWNS,ChessType.RED);
+        //乙方
+        mChessData[0][0] = new ChessBean(new Point(0,0),ChessType.ROOKS, mTopColor);
+        mChessData[8][0] = new ChessBean(new Point(8,0),ChessType.ROOKS, mTopColor);
+        mChessData[1][0] = new ChessBean(new Point(1,0),ChessType.KNIGHTS, mTopColor);
+        mChessData[7][0] = new ChessBean(new Point(7,0),ChessType.KNIGHTS, mTopColor);
+        mChessData[2][0] = new ChessBean(new Point(2,0),ChessType.ELEPHANTS, mTopColor);
+        mChessData[6][0] = new ChessBean(new Point(6,0),ChessType.ELEPHANTS, mTopColor);
+        mChessData[3][0] = new ChessBean(new Point(3,0),ChessType.MANDARINS, mTopColor);
+        mChessData[5][0] = new ChessBean(new Point(5,0),ChessType.MANDARINS, mTopColor);
+        mChessData[4][0] = new ChessBean(new Point(4,0),ChessType.KING, mTopColor);
+        mChessData[1][2] = new ChessBean(new Point(1,2),ChessType.CANNONS, mTopColor);
+        mChessData[7][2] = new ChessBean(new Point(7,2),ChessType.CANNONS, mTopColor);
+        mChessData[0][3] = new ChessBean(new Point(0,3),ChessType.PAWNS, mTopColor);
+        mChessData[2][3] = new ChessBean(new Point(2,3),ChessType.PAWNS, mTopColor);
+        mChessData[4][3] = new ChessBean(new Point(4,3),ChessType.PAWNS, mTopColor);
+        mChessData[6][3] = new ChessBean(new Point(6,3),ChessType.PAWNS, mTopColor);
+        mChessData[8][3] = new ChessBean(new Point(8,3),ChessType.PAWNS, mTopColor);
 
 
-        //黑方
-        mChessData[0][9] = new ChessBean(new Point(0,9),ChessType.ROOKS,ChessType.BLACK);
-        mChessData[8][9] = new ChessBean(new Point(8,9),ChessType.ROOKS,ChessType.BLACK);
-        mChessData[1][9] = new ChessBean(new Point(1,9),ChessType.KNIGHTS,ChessType.BLACK);
-        mChessData[7][9] = new ChessBean(new Point(7,9),ChessType.KNIGHTS,ChessType.BLACK);
-        mChessData[2][9] = new ChessBean(new Point(2,9),ChessType.ELEPHANTS,ChessType.BLACK);
-        mChessData[6][9] = new ChessBean(new Point(6,9),ChessType.ELEPHANTS,ChessType.BLACK);
-        mChessData[3][9] = new ChessBean(new Point(3,9),ChessType.MANDARINS,ChessType.BLACK);
-        mChessData[5][9] = new ChessBean(new Point(5,9),ChessType.MANDARINS,ChessType.BLACK);
-        mChessData[4][9] = new ChessBean(new Point(4,9),ChessType.KING,ChessType.BLACK);
-        mChessData[1][7] = new ChessBean(new Point(1,7),ChessType.CANNONS,ChessType.BLACK);
-        mChessData[7][7] = new ChessBean(new Point(7,7),ChessType.CANNONS,ChessType.BLACK);
-        mChessData[0][6] = new ChessBean(new Point(0,6),ChessType.PAWNS,ChessType.BLACK);
-        mChessData[2][6] = new ChessBean(new Point(2,6),ChessType.PAWNS,ChessType.BLACK);
-        mChessData[4][6] = new ChessBean(new Point(4,6),ChessType.PAWNS,ChessType.BLACK);
-        mChessData[6][6] = new ChessBean(new Point(6,6),ChessType.PAWNS,ChessType.BLACK);
-        mChessData[8][6] = new ChessBean(new Point(8,6),ChessType.PAWNS,ChessType.BLACK);
+        //己方
+        mChessData[0][9] = new ChessBean(new Point(0,9),ChessType.ROOKS, mBottomColor);
+        mChessData[8][9] = new ChessBean(new Point(8,9),ChessType.ROOKS, mBottomColor);
+        mChessData[1][9] = new ChessBean(new Point(1,9),ChessType.KNIGHTS, mBottomColor);
+        mChessData[7][9] = new ChessBean(new Point(7,9),ChessType.KNIGHTS, mBottomColor);
+        mChessData[2][9] = new ChessBean(new Point(2,9),ChessType.ELEPHANTS, mBottomColor);
+        mChessData[6][9] = new ChessBean(new Point(6,9),ChessType.ELEPHANTS, mBottomColor);
+        mChessData[3][9] = new ChessBean(new Point(3,9),ChessType.MANDARINS, mBottomColor);
+        mChessData[5][9] = new ChessBean(new Point(5,9),ChessType.MANDARINS, mBottomColor);
+        mChessData[4][9] = new ChessBean(new Point(4,9),ChessType.KING, mBottomColor);
+        mChessData[1][7] = new ChessBean(new Point(1,7),ChessType.CANNONS, mBottomColor);
+        mChessData[7][7] = new ChessBean(new Point(7,7),ChessType.CANNONS, mBottomColor);
+        mChessData[0][6] = new ChessBean(new Point(0,6),ChessType.PAWNS, mBottomColor);
+        mChessData[2][6] = new ChessBean(new Point(2,6),ChessType.PAWNS, mBottomColor);
+        mChessData[4][6] = new ChessBean(new Point(4,6),ChessType.PAWNS, mBottomColor);
+        mChessData[6][6] = new ChessBean(new Point(6,6),ChessType.PAWNS, mBottomColor);
+        mChessData[8][6] = new ChessBean(new Point(8,6),ChessType.PAWNS, mBottomColor);
+
+        mChessDataStack.push(getStrData());
     }
 
-    private void initAnimator(){
+    protected void initAnimator(){
         //将军
         mCheckAnimator = ValueAnimator.ofInt(1,15); //多显示3帧
         mCheckAnimator.setDuration(1500);
@@ -436,6 +469,8 @@ public class ChessBoardView extends View {
                 mEatChessAnim = null;
                 if(mWinner!=-1){
                     gameOver(mWinner);
+                }else{
+                    onStep();
                 }
             }
 
@@ -634,6 +669,24 @@ public class ChessBoardView extends View {
                 float top =  p.y-mChessBitmap.getWidth()/2-(mEatChessAnim.getHeight()-mChessBitmap.getWidth());
                 canvas.drawBitmap(mEatChessAnim,left,top,null);
             }
+
+            //绘制底部按钮
+            if(mRestartBtnRect == null){
+                int left = (int) (mViewWidth - mRestartBtnBitmap[0].getWidth()*2.2f);
+                int top = (int) (mViewHeight-mRestartBtnBitmap[0].getHeight()*1.2f);
+                mRestartBtnRect = new Rect(left,top,left+mRestartBtnBitmap[0].getWidth(),
+                        mRestartBtnBitmap[0].getHeight()+top);
+            }
+            if(mUndoBtnRect == null){
+                int left = (int) (mUndoBtnBitmap[0].getWidth()*1.2f);
+                int top = (int) (mViewHeight-mUndoBtnBitmap[0].getHeight()*1.2f);
+                mUndoBtnRect = new Rect(left,top,left+mUndoBtnBitmap[0].getWidth(),
+                        mUndoBtnBitmap[0].getHeight()+top);
+            }
+            canvas.drawBitmap(mUndoBtnBitmap[mUndoBtnStatus]
+                    ,mUndoBtnRect.left,mUndoBtnRect.top,null);
+            canvas.drawBitmap(mRestartBtnBitmap[mRestartBtnStatus]
+                    ,mRestartBtnRect.left,mRestartBtnRect.top,null);
         }
 
     }
@@ -644,7 +697,7 @@ public class ChessBoardView extends View {
      * @param p1
      * @param p2
      */
-    private void drawPreMoveMark(Canvas canvas,Point p1, Point p2){
+    protected void drawPreMoveMark(Canvas canvas,Point p1, Point p2){
         p1 = CBCoordToViewCoord(p1);
         p2 = CBCoordToViewCoord(p2);
         canvas.drawBitmap(mPreMoveMarkBitmap[0],p1.x-mPreMoveMarkBitmap[0].getWidth()/2
@@ -658,7 +711,7 @@ public class ChessBoardView extends View {
      * 绘制选中光标
      * @param canvas
      */
-    private void drawClickRect(Canvas canvas){
+    protected void drawClickRect(Canvas canvas){
         if( !mTouched || mTouchPoint.equals(-1,-1)) {
             return;
         }
@@ -673,7 +726,7 @@ public class ChessBoardView extends View {
      * @param canvas
      * @param points 棋盘坐标
      */
-    private void drawChessHint(Canvas canvas, ArrayList<Point> points){
+    protected void drawChessHint(Canvas canvas, ArrayList<Point> points){
         for (Point point : points) {
             Point viewPoint = CBCoordToViewCoord(point);
             canvas.drawBitmap(mChessHintBitmap,viewPoint.x-mChessHintBitmap.getWidth()/2,
@@ -688,7 +741,7 @@ public class ChessBoardView extends View {
      * @param chess 棋子
      * @param point 真实坐标
      */
-    private void drawMovingChess(Canvas canvas, ChessBean chess,Point point) {
+    protected void drawMovingChess(Canvas canvas, ChessBean chess,Point point) {
         Bitmap bitmap = mChessTextBitmap[1][chess.getColor()][chess.getType()];
 
         canvas.drawBitmap(mChessCheckedBitmap[chess.getColor()]
@@ -708,7 +761,7 @@ public class ChessBoardView extends View {
      * @param chess 棋子
      * @param isChecked 是否被选中
      */
-    private void drawChess(Canvas canvas, ChessBean chess,boolean isChecked) {
+    protected void drawChess(Canvas canvas, ChessBean chess,boolean isChecked) {
         Bitmap bitmap = mChessTextBitmap[isChecked?1:0][chess.getColor()][chess.getType()];
         Point point = CBCoordToViewCoord(chess.getCoord());
         if(isChecked){
@@ -734,7 +787,7 @@ public class ChessBoardView extends View {
      * 绘制棋盘
      * @param canvas
      */
-    private void drawChessBoard(Canvas canvas) {
+    protected void drawChessBoard(Canvas canvas) {
         mChessboardTop = (mViewHeight - mChessBoardHeight) / 2.5f;
         mChessboardLeft = 10;
         canvas.drawBitmap(mChessBoardBitmap, mChessboardLeft, mChessboardTop, null);
@@ -746,7 +799,7 @@ public class ChessBoardView extends View {
      * @param point 棋子的坐标
      * @return
      */
-    private Point CBCoordToViewCoord(Point point) {
+    protected Point CBCoordToViewCoord(Point point) {
         return new Point((int) mChessboardLeft + (int) mChessBoardLeftOffset + point.x * (int) mChessRectSize
                 , (int) mChessboardTop + (int) mChessBoardTopOffset + point.y * (int) mChessRectSize);
     }
@@ -757,7 +810,7 @@ public class ChessBoardView extends View {
      * @param point 屏幕上的坐标
      * @return
      */
-    private Point ViewCoordToCBCoord(Point point) {
+    protected Point ViewCoordToCBCoord(Point point) {
         Point ret = new Point();
         float min = 999999;
         for (int i = 0; i < 9; i++) {
@@ -792,6 +845,11 @@ public class ChessBoardView extends View {
                 case MotionEvent.ACTION_UP:
                     if(mCloseBtnRect.contains(point.x,point.y)){
                         //结束
+                        try{
+                            ((Activity)getContext()).onBackPressed();
+                        }catch (Exception e){
+
+                        };
                     }else if(mCollectionBtnRect.contains(point.x,point.y)){
                         //收藏
                     }else if(mAgainBtnRect.contains(point.x,point.y)){
@@ -827,6 +885,15 @@ public class ChessBoardView extends View {
                         mTouchPoint.set(-1,-1);
                         mTouched = false;
                     }
+
+                    if(mUndoBtnRect.contains(point.x,point.y)){
+                        //悔棋
+                        mUndoBtnStatus = 1;
+                    }
+                    if(mRestartBtnRect.contains(point.x,point.y)){
+                        //重来
+                        mRestartBtnStatus = 1;
+                    }
                     break;
 
                 case MotionEvent.ACTION_MOVE:
@@ -844,6 +911,18 @@ public class ChessBoardView extends View {
                     break;
 
                 case MotionEvent.ACTION_UP:
+                    if(mUndoBtnRect.contains(point.x,point.y) && mUndoBtnStatus == 1){
+                        //悔棋
+                        mUndoBtnStatus = 0;
+                        Undo(2);
+                    }
+                    if(mRestartBtnRect.contains(point.x,point.y) && mRestartBtnStatus == 1){
+                        //重来
+                        mRestartBtnStatus = 0;
+                        initChess();
+                        break;
+                    }
+
                     //通过拖拽来移动棋子
                     if(mMoving && !mCheckChess.equals(chessPoint) && !isPointNull(mCheckChess)){
                         moveChess(mChessData[mCheckChess.x][mCheckChess.y],chessPoint,false);
@@ -871,7 +950,7 @@ public class ChessBoardView extends View {
      *
      * @return
      */
-    private Bitmap getCacheBitmapFromView() {
+    protected Bitmap getCacheBitmapFromView() {
         final boolean drawingCacheEnabled = true;
         setDrawingCacheEnabled(drawingCacheEnabled);
         buildDrawingCache(drawingCacheEnabled);
@@ -892,7 +971,7 @@ public class ChessBoardView extends View {
         return bitmap;
     }
 
-    private void gameOver(int winner){
+    protected void gameOver(int winner){
         mWinner = winner;
         mChessBoardCacheBitmap = getCacheBitmapFromView();
         setBackgroundColor(Color.rgb(43,35,32));
@@ -904,12 +983,25 @@ public class ChessBoardView extends View {
     }
 
     /**
+     * 悔棋
+     * @param step
+     */
+    protected void Undo(int step){
+        if(mChessDataStack!=null && mChessDataStack.size()>step){
+            while(step-->0){
+                mChessDataStack.pop();
+            }
+            setStrData(mChessDataStack.peek());
+        }
+    }
+
+    /**
      * 移动一个棋子
      *
       * @param chess 被移动的棋子
      * @param point 移动的目的地
      */
-    private void moveChess(ChessBean chess, Point point, boolean startAnimator){
+    protected void moveChess(ChessBean chess, Point point, boolean startAnimator){
         if(point.equals(-1,-1) || chess==null || chess.getCoord().equals(point)
                 || !getChessHint(chess).contains(point) ) {
             return;
@@ -930,7 +1022,7 @@ public class ChessBoardView extends View {
 
         mCheckChess.set(-1,-1);
 
-        if(checkGeneral(mChessData[point.x][point.y].getColor())){
+        if(checkGeneral(mChessData[point.x][point.y])){
             if(checkKill(mChessData[point.x][point.y].getColor())){
                 mWinner = mChessData[point.x][point.y].getColor();
                 mKillAnimator.start();
@@ -939,7 +1031,7 @@ public class ChessBoardView extends View {
             }
 
         }
-
+        mCurColor = getOpponentColor(mCurColor);
         //是否带动画
         if(startAnimator){
             mMovingChessPoint.set(point.x,point.y);
@@ -978,17 +1070,41 @@ public class ChessBoardView extends View {
 
                     }
                 });
+            }else{
+                mMoveChessAnimator.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+                        onStep();
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animator) {
+
+                    }
+                });
             }
             mMoveChessAnimator.start();
         }else if(isEatChess){
             mMovingChessPoint.set(point.x,point.y);
             mEatChessAnimator.start();
+        }else{
+            onStep();
         }
-        mCurColor = mCurColor==ChessType.BLACK?ChessType.RED:ChessType.BLACK;
 
         mChessDataStack.push(getStrData());
-        Log.v("chessData",getStrData());
     }
+
+    abstract void onStep();
 
     /**
      * 计算2个点直接的距离
@@ -996,16 +1112,18 @@ public class ChessBoardView extends View {
      * @param p2
      * @return
      */
-    private double getPointDistance(Point p1, Point p2){
+    protected double getPointDistance(Point p1, Point p2){
         return Math.sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
     }
+
 
     /**
      * 获取一个棋子下一步能走的坐标
      * @param chess
+     * @param bottomColor
      * @return
      */
-    private ArrayList<Point> getChessHint(ChessBean chess){
+    public static ArrayList<Point> getChessHint(ChessBean chess, ChessBean[][] chessData,int bottomColor){
         ArrayList<Point> points = new ArrayList<>();
         if(chess == null){
             return points;
@@ -1018,9 +1136,9 @@ public class ChessBoardView extends View {
         switch (chess.getType()) {
             case ChessType.ROOKS: //车
                 for(int yy = y-1; yy>=0; yy--){ //up
-                    if(mChessData[x][yy] == null){//空白的地方
+                    if(chessData[x][yy] == null){//空白的地方
                         points.add(new Point(x,yy));
-                    }else if(mChessData[x][yy].getColor() == chess.getColor()){ //己方棋子
+                    }else if(chessData[x][yy].getColor() == chess.getColor()){ //己方棋子
                         break;
                     }else{ //乙方棋子
                         points.add(new Point(x,yy));
@@ -1028,9 +1146,9 @@ public class ChessBoardView extends View {
                     }
                 }
                 for(int yy = y+1; yy<10; yy++){ //down
-                    if(mChessData[x][yy] == null){//空白的地方
+                    if(chessData[x][yy] == null){//空白的地方
                         points.add(new Point(x,yy));
-                    }else if(mChessData[x][yy].getColor() == chess.getColor()){ //己方棋子
+                    }else if(chessData[x][yy].getColor() == chess.getColor()){ //己方棋子
                         break;
                     }else{ //乙方棋子
                         points.add(new Point(x,yy));
@@ -1038,9 +1156,9 @@ public class ChessBoardView extends View {
                     }
                 }
                 for(int xx = x-1; xx>=0; xx--){ //left
-                    if(mChessData[xx][y] == null){//空白的地方
+                    if(chessData[xx][y] == null){//空白的地方
                         points.add(new Point(xx,y));
-                    }else if(mChessData[xx][y].getColor() == chess.getColor()){ //己方棋子
+                    }else if(chessData[xx][y].getColor() == chess.getColor()){ //己方棋子
                         break;
                     }else{ //乙方棋子
                         points.add(new Point(xx,y));
@@ -1048,9 +1166,9 @@ public class ChessBoardView extends View {
                     }
                 }
                 for(int xx = x+1; xx<9; xx++){ //right
-                    if(mChessData[xx][y] == null){//空白的地方
+                    if(chessData[xx][y] == null){//空白的地方
                         points.add(new Point(xx,y));
-                    }else if(mChessData[xx][y].getColor() == chess.getColor()){ //己方棋子
+                    }else if(chessData[xx][y].getColor() == chess.getColor()){ //己方棋子
                         break;
                     }else{ //乙方棋子
                         points.add(new Point(xx,y));
@@ -1059,73 +1177,73 @@ public class ChessBoardView extends View {
                 }
                 break;
             case ChessType.KNIGHTS: //马
-                if(checkPoint(x+1,y-2) && (mChessData[x+1][y-2]==null
-                        ||mChessData[x+1][y-2].getColor()!=chess.getColor())
-                        && mChessData[x][y-1]==null){
+                if(checkPoint(x+1,y-2) && (chessData[x+1][y-2]==null
+                        ||chessData[x+1][y-2].getColor()!=chess.getColor())
+                        && chessData[x][y-1]==null){
                     points.add(new Point(x+1,y-2));
                 }
-                if(checkPoint(x+2,y-1) && (mChessData[x+2][y-1]==null
-                        ||mChessData[x+2][y-1].getColor()!=chess.getColor())
-                        && mChessData[x+1][y]==null){
+                if(checkPoint(x+2,y-1) && (chessData[x+2][y-1]==null
+                        ||chessData[x+2][y-1].getColor()!=chess.getColor())
+                        && chessData[x+1][y]==null){
                     points.add(new Point(x+2,y-1));
                 }
-                if(checkPoint(x+1,y+2) && (mChessData[x+1][y+2]==null
-                        ||mChessData[x+1][y+2].getColor()!=chess.getColor())
-                        && mChessData[x][y+1]==null){
+                if(checkPoint(x+1,y+2) && (chessData[x+1][y+2]==null
+                        ||chessData[x+1][y+2].getColor()!=chess.getColor())
+                        && chessData[x][y+1]==null){
                     points.add(new Point(x+1,y+2));
                 }
-                if(checkPoint(x+2,y+1) && (mChessData[x+2][y+1]==null
-                        ||mChessData[x+2][y+1].getColor()!=chess.getColor())
-                        && mChessData[x+1][y]==null){
+                if(checkPoint(x+2,y+1) && (chessData[x+2][y+1]==null
+                        ||chessData[x+2][y+1].getColor()!=chess.getColor())
+                        && chessData[x+1][y]==null){
                     points.add(new Point(x+2,y+1));
                 }
-                if(checkPoint(x-1,y-2) && (mChessData[x-1][y-2]==null
-                        ||mChessData[x-1][y-2].getColor()!=chess.getColor())
-                        && mChessData[x][y-1]==null){
+                if(checkPoint(x-1,y-2) && (chessData[x-1][y-2]==null
+                        ||chessData[x-1][y-2].getColor()!=chess.getColor())
+                        && chessData[x][y-1]==null){
                     points.add(new Point(x-1,y-2));
                 }
-                if(checkPoint(x-2,y-1) && (mChessData[x-2][y-1]==null
-                        ||mChessData[x-2][y-1].getColor()!=chess.getColor())
-                        && mChessData[x-1][y]==null){
+                if(checkPoint(x-2,y-1) && (chessData[x-2][y-1]==null
+                        ||chessData[x-2][y-1].getColor()!=chess.getColor())
+                        && chessData[x-1][y]==null){
                     points.add(new Point(x-2,y-1));
                 }
-                if(checkPoint(x-1,y+2) && (mChessData[x-1][y+2]==null
-                        ||mChessData[x-1][y+2].getColor()!=chess.getColor())
-                        && mChessData[x][y+1]==null){
+                if(checkPoint(x-1,y+2) && (chessData[x-1][y+2]==null
+                        ||chessData[x-1][y+2].getColor()!=chess.getColor())
+                        && chessData[x][y+1]==null){
                     points.add(new Point(x-1,y+2));
                 }
-                if(checkPoint(x-2,y+1) && (mChessData[x-2][y+1]==null
-                        ||mChessData[x-2][y+1].getColor()!=chess.getColor())
-                        && mChessData[x-1][y]==null){
+                if(checkPoint(x-2,y+1) && (chessData[x-2][y+1]==null
+                        ||chessData[x-2][y+1].getColor()!=chess.getColor())
+                        && chessData[x-1][y]==null){
                     points.add(new Point(x-2,y+1));
                 }
                 break;
             case ChessType.ELEPHANTS: //象
                 //上右
-                if(checkPoint(x+2,y-2) && (mChessData[x+2][y-2]==null
-                        ||mChessData[x+2][y-2].getColor()!=chess.getColor())
-                        && mChessData[x+1][y-1]==null && y!=5){
+                if(checkPoint(x+2,y-2) && (chessData[x+2][y-2]==null
+                        ||chessData[x+2][y-2].getColor()!=chess.getColor())
+                        && chessData[x+1][y-1]==null && y!=5){
                     points.add(new Point(x+2,y-2));
                 }
 
                 //下右
-                if(checkPoint(x+2,y+2) && (mChessData[x+2][y+2]==null
-                        ||mChessData[x+2][y+2].getColor()!=chess.getColor())
-                        && mChessData[x+1][y+1]==null && y!=4){
+                if(checkPoint(x+2,y+2) && (chessData[x+2][y+2]==null
+                        ||chessData[x+2][y+2].getColor()!=chess.getColor())
+                        && chessData[x+1][y+1]==null && y!=4){
                     points.add(new Point(x+2,y+2));
                 }
 
                 //上左
-                if(checkPoint(x-2,y-2) && (mChessData[x-2][y-2]==null
-                        ||mChessData[x-2][y-2].getColor()!=chess.getColor())
-                        && mChessData[x-1][y-1]==null && y!=5){
+                if(checkPoint(x-2,y-2) && (chessData[x-2][y-2]==null
+                        ||chessData[x-2][y-2].getColor()!=chess.getColor())
+                        && chessData[x-1][y-1]==null && y!=5){
                     points.add(new Point(x-2,y-2));
                 }
 
                 //下左
-                if(checkPoint(x-2,y+2) && (mChessData[x-2][y+2]==null
-                        ||mChessData[x-2][y+2].getColor()!=chess.getColor())
-                        && mChessData[x-1][y+1]==null  && y!=4){
+                if(checkPoint(x-2,y+2) && (chessData[x-2][y+2]==null
+                        ||chessData[x-2][y+2].getColor()!=chess.getColor())
+                        && chessData[x-1][y+1]==null  && y!=4){
                     points.add(new Point(x-2,y+2));
                 }
                 break;
@@ -1133,47 +1251,71 @@ public class ChessBoardView extends View {
                 for(int i = 0; i<4; i++){
                     int xx = x+dir2[i][0];
                     int yy = y+dir2[i][1];
-                    if(checkPoint(xx,yy) && checkInKing(xx,yy) && (mChessData[xx][yy]==null
-                            ||mChessData[xx][yy].getColor()!=chess.getColor())){
+                    if(checkPoint(xx,yy) && checkInKing(xx,yy) && (chessData[xx][yy]==null
+                            ||chessData[xx][yy].getColor()!=chess.getColor())){
                         points.add(new Point(xx,yy));
                     }
                 }
                 break;
             case ChessType.KING: //将
+                //先找到对方将的位置
+                Point GeneralPoint = new Point();
+                for(int i = 0; i<9; i++){
+                    for(int j = 0; j<10; j++) {
+                        if(chessData[i][j] != null && chessData[i][j].getColor()!=chess.getColor()
+                                && chessData[i][j].getType()==ChessType.KING){
+                            GeneralPoint.set(i,j);
+                            break;
+                        }
+                    }
+                }
+                boolean flag = false; //2个将之间是否有其他棋子
+                for(int i = Math.min(chess.getCoord().y,GeneralPoint.y)+1;
+                    i<Math.max(chess.getCoord().y,GeneralPoint.y); i++){
+                    if(chessData[GeneralPoint.x][i]!=null){
+                        flag = true;
+                        break;
+                    }
+                }
+                if(GeneralPoint.x==chess.getCoord().x && !flag){
+                        points.add(new Point(GeneralPoint.x,GeneralPoint.y));
+                        break;
+                }
                 for(int i = 0; i<4; i++){
                     int xx = x+dir[i][0];
                     int yy = y+dir[i][1];
-                    if(checkPoint(xx,yy) && checkInKing(xx,yy) && (mChessData[xx][yy]==null
-                            ||mChessData[xx][yy].getColor()!=chess.getColor())){
+                    if(checkPoint(xx,yy) && checkInKing(xx,yy) && (chessData[xx][yy]==null
+                            ||chessData[xx][yy].getColor()!=chess.getColor())
+                            && !(GeneralPoint.x==xx && !flag)){
                         points.add(new Point(xx,yy));
                     }
                 }
                 break;
             case ChessType.PAWNS: //兵
-                if(chess.getColor()==ChessType.BLACK){
-                    if(y<=4 && checkPoint(x-1,y) && (mChessData[x-1][y]==null
-                            ||mChessData[x-1][y].getColor()!=chess.getColor())){ //已过河
+                if(chess.getColor() == bottomColor){
+                    if(y<=4 && checkPoint(x-1,y) && (chessData[x-1][y]==null
+                            ||chessData[x-1][y].getColor()!=chess.getColor())){ //已过河
                         points.add(new Point(x-1,y));
                     }
-                    if(y<=4 && checkPoint(x+1,y) && (mChessData[x+1][y]==null
-                            ||mChessData[x+1][y].getColor()!=chess.getColor())){ //已过河
+                    if(y<=4 && checkPoint(x+1,y) && (chessData[x+1][y]==null
+                            ||chessData[x+1][y].getColor()!=chess.getColor())){ //已过河
                         points.add(new Point(x+1,y));
                     }
-                    if(checkPoint(x,y-1) && (mChessData[x][y-1]==null
-                            ||mChessData[x][y-1].getColor()!=chess.getColor())){
+                    if(checkPoint(x,y-1) && (chessData[x][y-1]==null
+                            ||chessData[x][y-1].getColor()!=chess.getColor())){
                         points.add(new Point(x,y-1));
                     }
                 }else{
-                    if(y>=5 && checkPoint(x-1,y) && (mChessData[x-1][y]==null
-                            ||mChessData[x-1][y].getColor()!=chess.getColor())){ //已过河
+                    if(y>=5 && checkPoint(x-1,y) && (chessData[x-1][y]==null
+                            ||chessData[x-1][y].getColor()!=chess.getColor())){ //已过河
                         points.add(new Point(x-1,y));
                     }
-                    if(y>=5 && checkPoint(x+1,y) && (mChessData[x+1][y]==null
-                            ||mChessData[x+1][y].getColor()!=chess.getColor())){ //已过河
+                    if(y>=5 && checkPoint(x+1,y) && (chessData[x+1][y]==null
+                            ||chessData[x+1][y].getColor()!=chess.getColor())){ //已过河
                         points.add(new Point(x+1,y));
                     }
-                    if(checkPoint(x,y+1) && (mChessData[x][y+1]==null
-                            ||mChessData[x][y+1].getColor()!=chess.getColor())){
+                    if(checkPoint(x,y+1) && (chessData[x][y+1]==null
+                            ||chessData[x][y+1].getColor()!=chess.getColor())){
                         points.add(new Point(x,y+1));
                     }
                 }
@@ -1181,12 +1323,12 @@ public class ChessBoardView extends View {
 
             case ChessType.CANNONS: //炮
                 for(int yy = y-1; yy>=0; yy--){ //up
-                    if(mChessData[x][yy] == null){//空白的地方
+                    if(chessData[x][yy] == null){//空白的地方
                         points.add(new Point(x,yy));
                     }else { //找到一个棋子，现在要找这个棋子后面的乙方棋子
                         for(int yyy = yy-1; yyy>=0; yyy--){
-                            if(mChessData[x][yyy] != null){
-                                if(mChessData[x][yyy].getColor() != chess.getColor()){
+                            if(chessData[x][yyy] != null){
+                                if(chessData[x][yyy].getColor() != chess.getColor()){
                                     points.add(new Point(x,yyy));
                                 }
                                 break;
@@ -1196,12 +1338,12 @@ public class ChessBoardView extends View {
                     }
                 }
                 for(int yy = y+1; yy<10; yy++){ //down
-                    if(mChessData[x][yy] == null){//空白的地方
+                    if(chessData[x][yy] == null){//空白的地方
                         points.add(new Point(x,yy));
                     }else { //找到一个棋子，现在要找这个棋子后面的乙方棋子
                         for(int yyy = yy+1; yyy<10; yyy++){
-                            if(mChessData[x][yyy] != null){
-                                if(mChessData[x][yyy].getColor() != chess.getColor()){
+                            if(chessData[x][yyy] != null){
+                                if(chessData[x][yyy].getColor() != chess.getColor()){
                                     points.add(new Point(x,yyy));
                                 }
                                 break;
@@ -1211,12 +1353,12 @@ public class ChessBoardView extends View {
                     }
                 }
                 for(int xx = x-1; xx>=0; xx--){ //left
-                    if(mChessData[xx][y] == null){//空白的地方
+                    if(chessData[xx][y] == null){//空白的地方
                         points.add(new Point(xx,y));
                     }else { //找到一个棋子，现在要找这个棋子后面的乙方棋子
                         for(int xxx = xx-1; xxx>=0; xxx--){
-                            if(mChessData[xxx][y] != null){
-                                if(mChessData[xxx][y].getColor() != chess.getColor()){
+                            if(chessData[xxx][y] != null){
+                                if(chessData[xxx][y].getColor() != chess.getColor()){
                                     points.add(new Point(xxx,y));
                                 }
                                 break;
@@ -1226,12 +1368,12 @@ public class ChessBoardView extends View {
                     }
                 }
                 for(int xx = x+1; xx<9; xx++){ //right
-                    if(mChessData[xx][y] == null){//空白的地方
+                    if(chessData[xx][y] == null){//空白的地方
                         points.add(new Point(xx,y));
                     }else  { //找到一个棋子，现在要找这个棋子后面的乙方棋子
                         for(int xxx = xx+1; xxx<9; xxx++){
-                            if(mChessData[xxx][y] != null){
-                                if(mChessData[xxx][y].getColor() != chess.getColor()){
+                            if(chessData[xxx][y] != null){
+                                if(chessData[xxx][y].getColor() != chess.getColor()){
                                     points.add(new Point(xxx,y));
                                 }
                                 break;
@@ -1246,13 +1388,17 @@ public class ChessBoardView extends View {
         return points;
     }
 
+    protected ArrayList<Point> getChessHint(ChessBean chess){
+        return getChessHint(chess, mChessData, mBottomColor);
+    }
+
     /**
      * 获取指定坐标的棋子
      *
      * @param point
      * @return
      */
-    private ChessBean getChess(Point point){
+    protected ChessBean getChess(Point point){
         if(point.equals(-1,-1)) {
             return null;
         }else {
@@ -1266,7 +1412,7 @@ public class ChessBoardView extends View {
      * @param point
      * @return
      */
-    private boolean isPointNull(Point point){
+    protected boolean isPointNull(Point point){
         return point.equals(-1,-1)||mChessData[point.x][point.y]==null;
     }
 
@@ -1275,7 +1421,7 @@ public class ChessBoardView extends View {
      * @param point
      * @return
      */
-    private boolean checkPoint(Point point){
+    protected boolean checkPoint(Point point){
         return (point.x>=0&&point.x<9&&point.y>=0&&point.y<10);
     }
 
@@ -1285,7 +1431,7 @@ public class ChessBoardView extends View {
      * @param y
      * @return
      */
-    private boolean checkPoint(int x,int y){
+    public static boolean checkPoint(int x,int y){
         return (x>=0&&x<9&&y>=0&&y<10);
     }
 
@@ -1295,8 +1441,17 @@ public class ChessBoardView extends View {
      * @param y
      * @return
      */
-    private boolean checkInKing(int x,int y){
+    public static boolean checkInKing(int x,int y){
         return (x>=3&&x<=5)&&(y>=0&&y<=2||y>=7&&y<=9);
+    }
+
+    /**
+     * 获取相对颜色
+     * @param color
+     * @return
+     */
+    protected int getOpponentColor(int color){
+        return color == ChessType.RED?ChessType.BLACK:ChessType.RED;
     }
 
     /**
@@ -1304,7 +1459,7 @@ public class ChessBoardView extends View {
      * @param color 要指定颜色,-1为所有颜色
      * @return
      */
-    private ArrayList<ChessBean> getAllChess(int color){
+    protected ArrayList<ChessBean> getAllChess(int color){
         ArrayList<ChessBean> chessBeanArrayList = new ArrayList<>();
         for(int i = 0; i<9; i++){
             for(int j = 0; j<10; j++) {
@@ -1321,12 +1476,33 @@ public class ChessBoardView extends View {
     }
 
     /**
+     * 判断制定棋子是否将军对手
+     * @param chess
+     * @return
+     */
+    protected boolean checkGeneral(ChessBean chess){
+        //先找到对方将的位置
+        Point GeneralPoint = new Point();
+        for(int i = 0; i<9; i++){
+            for(int j = 0; j<10; j++) {
+                if(mChessData[i][j] != null && mChessData[i][j].getColor()!=chess.getColor()
+                        && mChessData[i][j].getType()==ChessType.KING){
+                    GeneralPoint.set(i,j);
+                    break;
+                }
+            }
+        }
+        //判断棋子是否能吃到对方的将
+        return getChessHint(chess).contains(GeneralPoint);
+    }
+
+    /**
      * 判断当前是否将军对手
      *
      * @param color 己方颜色
      * @return
      */
-    private boolean checkGeneral(int color){
+    protected boolean checkGeneral(int color){
         //先找到对方将的位置
         Point GeneralPoint = new Point();
         for(int i = 0; i<9; i++){
@@ -1352,7 +1528,7 @@ public class ChessBoardView extends View {
      * @param color 己方颜色
      * @return
      */
-    private boolean checkKill(int color){
+    protected boolean checkKill(int color){
         //如果没将军则不判断
         if(!checkGeneral(color)){
             return false;
@@ -1396,7 +1572,7 @@ public class ChessBoardView extends View {
      * @param chess
      * @return
      */
-    private ChessBean copyChess(ChessBean chess){
+    protected ChessBean copyChess(ChessBean chess){
         if(chess==null)return null;
         return new ChessBean(chess.getCoord(),chess.getType(),chess.getColor());
     }
@@ -1419,12 +1595,12 @@ public class ChessBoardView extends View {
      */
     public String getStrData(){
 //        //棋盘数据
-//        private ChessBean mChessData[][];
-//        private int mWinner;
-//        private boolean mGameOver;
-//        private int mCurColor; //当前轮到什么颜色下
-//        private Point mPreMovePoint[]; //记录上一次移动
-//        private int mChessCounter; //计步
+//        protected ChessBean mChessData[][];
+//        protected int mWinner;
+//        protected boolean mGameOver;
+//        protected int mCurColor; //当前轮到什么颜色下
+//        protected Point mPreMovePoint[]; //记录上一次移动
+//        protected int mChessCounter; //计步
         String result = "";
         ArrayList<ChessBean> chessList = getAllChess(-1);
         for(ChessBean chess : chessList){
@@ -1435,7 +1611,8 @@ public class ChessBoardView extends View {
         result += mCurColor+",";
         result += mPreMovePoint[0].x+","+mPreMovePoint[0].y+",";
         result += mPreMovePoint[1].x+","+mPreMovePoint[1].y+",";
-        result += mChessCounter;
+        result += mChessCounter+",";
+        result += mBottomColor;
         return result;
     }
 
@@ -1449,8 +1626,8 @@ public class ChessBoardView extends View {
 
         //设置棋子数据
         mChessData = new ChessBean[9][10]; //先清空
-        int chessNum = s.length - 8;
-        for(int i = 0; i<s.length-8; i++){
+        int chessNum = s.length - 9;
+        for(int i = 0; i<chessNum; i++){
             ChessBean chess = new ChessBean(Integer.valueOf(s[i]));
             mChessData[chess.getCoord().x][chess.getCoord().y] = chess;
         }
@@ -1466,5 +1643,8 @@ public class ChessBoardView extends View {
         mPreMovePoint[1].y = Integer.valueOf(s[chessNum+6]);
 
         mChessCounter = Integer.valueOf(s[chessNum+7]);
+
+        mBottomColor = Integer.valueOf(s[chessNum+8]);
+        mTopColor = getOpponentColor(mBottomColor);
     }
 }

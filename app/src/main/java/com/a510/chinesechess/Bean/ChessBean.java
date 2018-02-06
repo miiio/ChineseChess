@@ -11,6 +11,7 @@ public class ChessBean {
         Coord = new Point(coord.x,coord.y);
         Type = type;
         Color = color;
+        isAlive = true;
     }
 
     /**
@@ -28,11 +29,22 @@ public class ChessBean {
             this.Coord = new Point();
         }
         this.Coord .set(i&15,i>>4&15);
+        isAlive = true;
     }
 
     private Point Coord;
     private int Type;
     private int Color;
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public void setAlive(boolean alive) {
+        isAlive = alive;
+    }
+
+    private boolean isAlive;
 
     public Point getCoord() {
         return Coord;
