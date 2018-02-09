@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorDarkBrown">
+    android:background="@color/colorDarkBrown"
+    android:focusable="true"
+    android:focusableInTouchMode="true"  >
 
     <ImageView
         android:id="@+id/title"
@@ -13,18 +16,104 @@
         android:scaleType="centerCrop"
         android:src="@drawable/room_title" />
 
+    <LinearLayout
+        android:id="@+id/room_number"
+        android:layout_marginTop="6dp"
+        android:layout_below="@+id/title"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="全部: "
+            android:textColor="#ffffff"
+            android:textSize="15sp"/>
+        <TextView
+            android:layout_marginRight="30dp"
+            android:id="@+id/room_number_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="12"
+            android:textColor="#ffffff"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="空闲: "
+            android:textColor="#ffffff"
+            android:textSize="15sp"/>
+        <TextView
+            android:id="@+id/room_number_free"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="12"
+            android:textColor="#ffffff"/>
+
+    </LinearLayout>
+
+    <SearchView
+        android:id="@+id/search_view"
+        android:gravity="center_horizontal"
+        android:layout_margin="6dp"
+        android:background="@drawable/search_bg"
+        android:layout_below="@+id/room_number"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:iconifiedByDefault="false"
+        android:queryHint="输入房间id"
+        tools:ignore="RtlHardcoded" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
+        android:layout_below="@+id/search_view"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_id"
-        android:layout_below="@+id/title"
+        android:layout_above="@+id/bottm_root"
+        android:layout_below="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
     </android.support.v7.widget.RecyclerView>
 
     <RelativeLayout
+        android:id="@+id/bottm_root"
+        android:background="@color/colorDarkBrown"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="60dp">
 
+        <ImageView
+            android:id="@+id/btn_exit"
+            android:layout_marginLeft="10dp"
+            android:layout_centerVertical="true"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@drawable/btn_exit_room"/>
+
+        <ImageView
+            android:id="@+id/btn_creat_room"
+            android:layout_centerHorizontal="true"
+            android:layout_width="140dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/btn_creat_room"/>
     </RelativeLayout>
+
+    <FrameLayout
+        android:orientation="vertical"
+        android:id="@+id/fragment_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
 </RelativeLayout>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/fragment_creat">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorDarkBrown"
+        android:alpha="0.6"/>
+
+    <RelativeLayout
+        android:id="@+id/creat_room_menu"
+        android:background="#fff"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/fragment_title"
+            android:layout_marginTop="16dp"
+            android:layout_centerHorizontal="true"
+
+            android:textSize="27sp"
+            android:textColor="#505050"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="创建房间"/>
+
+        <ImageView
+            android:id="@+id/btn_close_fragment"
+            android:layout_marginRight="16dp"
+            android:layout_alignTop="@+id/fragment_title"
+            android:layout_alignParentRight="true"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/btn_fragment_close"/>
+
+        <ImageView
+            android:id="@+id/line_fragment"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_below="@+id/fragment_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/fragment_line"/>
+
+        <LinearLayout
+            android:id="@+id/room_name"
+            android:layout_below="@+id/line_fragment"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="房间名"
+                android:textColor="#000000"
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/room_name_edit"
+                android:layout_marginLeft="16dp"
+                android:textSize="20sp"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:hint="点击输入房间名"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/password"
+            android:layout_below="@+id/room_name"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="密码"
+                android:textColor="#000000"
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/password_edit"
+                android:layout_marginLeft="16dp"
+                android:textSize="20sp"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:hint="点击输入密码"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/bet"
+            android:layout_below="@+id/password"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="30dp"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="底注"
+                android:textColor="#000000"
+                android:textSize="20sp"/>
+
+            <EditText
+                android:id="@+id/bet_edit"
+                android:layout_marginLeft="16dp"
+                android:textSize="20sp"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:hint="点击输入底注"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</RelativeLayout>
