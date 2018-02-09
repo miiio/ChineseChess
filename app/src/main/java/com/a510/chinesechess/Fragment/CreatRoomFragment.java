@@ -26,8 +26,8 @@ public class CreatRoomFragment extends Fragment {
     private RelativeLayout mCreatMenu;
     private EditText mRoomName;
     private EditText mPassWord;
-    private EditText mBet;
     private View mView;
+    private ImageView mBeginCreat;
 
     @Nullable
     @Override
@@ -40,10 +40,20 @@ public class CreatRoomFragment extends Fragment {
 
     private void initView() {
 
+        //创建房间按钮
+        mBeginCreat = mView.findViewById(R.id.btn_begin_creat);
+        mBeginCreat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        //房间名EditText
         mRoomName = mView.findViewById(R.id.room_name_edit);
         mPassWord = mView.findViewById(R.id.password_edit);
-        mBet = mView.findViewById(R.id.bet_edit);
 
+        //fragment根布局
         mCreatMenu = (RelativeLayout)mView.findViewById(R.id.creat_room_menu);
         mCreatMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +72,7 @@ public class CreatRoomFragment extends Fragment {
             }
         });
 
+        //关闭按钮
         mClose = (ImageView)mView.findViewById(R.id.btn_close_fragment);
         mClose.setOnClickListener(new View.OnClickListener() {
             @Override
