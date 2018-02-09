@@ -1,20 +1,25 @@
 package com.a510.chinesechess;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SearchView;
+import android.widget.Toast;
 
-import com.a510.chinesechess.Adapter.RecyclerAdapter;
+import com.a510.chinesechess.Adapter.RoomRecyclerAdapter;
+import com.a510.chinesechess.Bean.RoomsBean;
 import com.a510.chinesechess.Fragment.CreatRoomFragment;
-import com.a510.chinesechess.View.SettlementView;
+import com.google.gson.Gson;
+import com.vilyever.socketclient.SocketClient;
+import com.vilyever.socketclient.SocketResponsePacket;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +32,48 @@ public class OnlineActivity extends AppCompatActivity {
 
     private List<String> list = new ArrayList<>();
     private RecyclerView mRecyclerView;
-    private RecyclerAdapter mAdapter;
+    private RoomRecyclerAdapter mAdapter;
     private SearchView mSearchView;
     private ImageView mCreatBtn;
     private ImageView mExitBtn;
     private CreatRoomFragment mCreatRoomFragment;
+    private SocketClient socketClient;
+    private List<RoomsBean.DataBean> mRooms;
+
+    private SocketClient.SocketDelegate socketDelegate = new SocketClient.SocketDelegate() {
+        @Override
+        public void onConnected(SocketClient client) {
+
+        }
+
+        @Override
+        public void onDisconnected(SocketClient client) {
+            Toast.makeText(OnlineActivity.this,"与服务器断开连接",Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        @Override
+        public void onResponse(SocketClient client, @NonNull SocketResponsePacket responsePacket) {
+            String json = responsePacket.getMessage();
+            if(json == null){
+                return;
+            }
+            try {
+                JSONObject jsonObject = new JSONObject(json);
+                String data = jsonObject.get("data").toString();
+                switch (jsonObject.getString("type")){
+                    case "all_rooms":
+                        //加载房间列表
+                        mRooms.clear();
+                        mRooms.addAll(new Gson().fromJson(jsonObject.toString(),RoomsBean.class).getData());
+                        mAdapter.notifyDataSetChanged();
+                        break;
+                }
+            }catch (Exception e){
+
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,6 +81,16 @@ public class OnlineActivity extends AppCompatActivity {
         setContentView(R.layout.activity_online);
         initData();
         initView();
+        socketClient = ((MyApplication)getApplication()).getSocketClient();
+        socketClient.registerSocketDelegate(socketDelegate);
+        loadRooms();
+    }
+
+    /**
+     * 加载房间列表
+     */
+    public void loadRooms(){
+        socketClient.sendString("{\"mod\":\"Room\", \"act\":\"getPage\",\"args\":{\"page\":1}}");
     }
 
     private void initView() {
@@ -64,7 +116,8 @@ public class OnlineActivity extends AppCompatActivity {
         });
 
         mRecyclerView = (RecyclerView)findViewById(R.id.recycler_id);
-        mAdapter = new RecyclerAdapter(this, R.layout.room_list_item, list);
+        mRooms = new ArrayList<>();
+        mAdapter = new RoomRecyclerAdapter(this, R.layout.room_list_item, mRooms);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
 

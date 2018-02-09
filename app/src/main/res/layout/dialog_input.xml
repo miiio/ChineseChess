@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="20dp"
+    android:orientation="vertical"
+    android:background="#E1D2BF">
+
+
+    <TextView
+        android:id="@+id/dialog_tv_msg"
+        android:text="这是对话框的提示"
+        android:textSize="18sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"/>
+
+    <EditText
+        android:id="@+id/dialog_edit"
+        android:padding="5dp"
+        android:hint="请输入4到10位密码"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#CAB192"/>
+
+    <LinearLayout
+        android:layout_marginTop="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/dialog_btn_canel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/dialog_btn_canel_normal"
+            android:text="取消"
+            android:textColor="#ffffff"
+            android:layout_height="45dp" />
+        <Button
+            android:layout_marginLeft="20dp"
+            android:id="@+id/dialog_btn_ok"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/dialog_btn_ok_normal"
+            android:text="确定"
+            android:textColor="#ffffff"
+            android:layout_height="45dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
